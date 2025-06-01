@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <title>سیستم ثبت و مدیریت سفارش لباس سنتی افغانی</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Tahoma, sans-serif;
+      background-image: url('https://source.unsplash.com/1600x900/?afghan-dress');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      direction: rtl;
+      padding: 30px;
+      color: black; /* متن سیاه */
+      min-height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      color: black;
+    }
+    form, table {
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 800px;
+      margin: 20px auto;
+      box-sizing: border-box;
+      color: black;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+      color: black;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #aaa;
+      font-size: 16px;
+      color: black;
+      background-color: white;
+    }
+    button {
+      background-color: #8b0000;
+      color: white;
+      padding: 12px;
+      margin-top: 20px;
+      width: 100%;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #a60000;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      color: black;
+      background-color: #fff;
+    }
+    th, td {
+      padding: 10px;
+      text-align: right;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      color: black;
+    }
+    th {
+      background-color: #e0e0e0;
+      color: black;
+    }
+    td input, td select {
+      width: 90%;
+      padding: 5px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #aaa;
+      color: black;
+      background-color: white;
+    }
+    .btn {
+      display: inline-block;
+      margin: 10px 5px 30px 5px;
+      text-decoration: none;
+      color: #fff;
+      background-color: #8b0000;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn.print { background-color: #006400; }
+    .btn.clear { background-color: #b22222; }
+    .btn.pdf { background-color: #2e3a59; }
+    .btn:hover { opacity: 0.9; }
+    #searchArea {
+      max-width: 800px;
+      margin: 0 auto 10px auto;
+      text-align: center;
+      color: black;
+    }
+    #searchInput {
+      width: 60%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #aaa;
+      margin-right: 10px;
+      color: black;
+      background-color: white;
+    }
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      color: black;
+      font-size: 14px;
+    }
+    /* پیام ثبت سفارش */
+    #orderMessage {
+      margin-top: 15px;
+      color: green;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>فرم ثبت سفارش لباس‌های سنتی افغانی</h1>
+  <form id="orderForm">
+    <label for="customerName">اسم مشتری:</label>
+    <input type="text" id="customerName" required placeholder="نام مشتری را وارد کنید" />
+
+    <label for="customerPhone">شماره تماس:</label>
+    <input type="tel" id="customerPhone" required placeholder="مثلاً 0782667669" />
+
+    <label for="customerAddress">آدرس:</label>
+    <input type="text" id="customerAddress" required placeholder="آدرس را وارد کنید" />
+
+    <label for="customerAge">سن:</label>
+    <input type="number" id="customerAge" required min="1" placeholder="مثلاً 25" />
+
+    <label for="dressChoice">لباس انتخابی:</label>
+    <select id="dressChoice" required>
+      <option value="">-- انتخاب کنید --</option>
+      <option value="لباس قندهاری">لباس قندهاری</option>
+      <option value="لباس هزارگی">لباس هزارگی</option>
+      <option value="لباس پشتونی">لباس پشتونی</option>
+      <option value="لباس بلوچی">لباس بلوچی</option>
+      <option value="لباس نورستانی">لباس نورستانی</option>
+    </select>
+
+    <label for="orderDate">تاریخ ثبت سفارش:</label>
+    <input type="date" id="orderDate" required />
+
+    <button type="button" onclick="submitOrder()">ثبت سفارش</button>
+    <div id="orderMessage"></div>
+  </form>
+
+  <div class="footer">
+    طراحی شده توسط: آرزو طراح لباس‌های سنتی افغانستان | تماس: 0782667669 | مزارشریف
+  </div>
+
+  <h1>لیست سفارش‌های ثبت‌شده</h1>
+
+  <div id="searchArea">
+    <input type="text" id="searchInput" placeholder="نام مشتری را وارد کنید..." />
+    <button class="btn" onclick="searchOrders()">🔍 جستجو</button>
+    <button class="btn pdf" onclick="generateInvoice()">🧾 صدور فاکتور</button>
+  </div>
+
+  <table id="ordersTable" dir="rtl">
+    <thead>
+      <tr>
+        <th>اسم مشتری</th>
+        <th>شماره تماس</th>
+        <th>آدرس</th>
+        <th>سن</th>
+        <th>لباس انتخابی</th>
+        <th>تاریخ سفارش</th>
+        <th>ویرایش</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div style="max-width:800px; margin:20px auto; text-align:center;">
+    <button class="btn print" onclick="window.print()">🖨️ چاپ</button>
+    <button class="btn clear" onclick="clearOrders()">🧹 حذف همه</button>
+    <button class="btn pdf" onclick="exportToPDF()">📄 خروجی PDF</button>
+  </div>
+
+<script>
+  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+  const tableBody = document.querySelector("#ordersTable tbody");
+
+  function displayOrders(list) {
+    tableBody.innerHTML = "";
+    if (list.length === 0) {
+      tableBody.innerHTML = "<tr><td colspan='7' style='text-align:center'>هیچ سفارشی ثبت نشده است.</td></tr>";
+      return;
+    }
+    list.forEach((order, index) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input value="${order.name}" onchange="updateOrder(${index}, 'name', this.value)"></td>
+        <td><input value="${order.phone}" onchange="updateOrder(${index}, 'phone', this.value)"></td>
+        <td><input value="${order.address}" onchange="updateOrder(${index}, 'address', this.value)"></td>
+        <td><input type="number" min="1" value="${order.age}" onchange="updateOrder(${index}, 'age', this.value)"></td>
+        <td>
+          <select onchange="updateOrder(${index}, 'dress', this.value)">
+            <option ${order.dress === 'لباس قندهاری' ? 'selected' : ''}>لباس قندهاری</option>
+            <option ${order.dress === 'لباس هزارگی' ? 'selected' : ''}>لباس هزارگی</option>
+            <option ${order.dress === 'لباس پشتونی' ? 'selected' : ''}>لباس پشتونی</option>
+            <option ${order.dress === 'لباس بلوچی' ? 'selected' : ''}>لباس بلوچی</option>
+            <option ${order.dress === 'لباس نورستانی' ? 'selected' : ''}>لباس نورستانی</option>
+          </select>
+        </td>
+        <td><input type="date" value="${order.date}" onchange="updateOrder(${index}, 'date', this.value)"></td>
+        <td><button onclick="deleteOrder(${index})" style="background:#b22222; border:none; border-radius:4px; color:#fff; cursor:pointer;">حذف</button></td>
+      `;
+      tableBody.appendChild(row);
+    });
+  }
+
+  function submitOrder() {
+    const name = document.getElementById("customerName").value.trim();
+    const phone = document.getElementById("customerPhone").value.trim();
+    const address = document.getElementById("customerAddress").value.trim();
+    const age = document.getElementById("customerAge").value.trim();
+    const dress = document.getElementById("dressChoice").value;
+    const date = document.getElementById("orderDate").value;
+
+    if (!name || !phone || !address || !age || !dress || !date) {
+      alert("لطفاً همه فیلدها را کامل پر کنید.");
+      return;
+    }
+
+    const order = { name, phone, address, age, dress, date };
+    orders.push(order);
+    localStorage.setItem("orders", JSON.stringify(orders));
+    document.getElementById("orderForm").reset();
+    displayOrders(orders);
+
+    const msgDiv = document.getElementById("orderMessage");
+    msgDiv.textContent = "✅ سفارش جدید ثبت شد. پرداخت درب منزل صورت می‌گیرد.";
+    setTimeout(() => {
+      msgDiv.textContent = "";
+    }, 5000);
+  }
+
+  function updateOrder(index, field, value) {
+    orders[index][field] = value;
+    localStorage.setItem("orders", JSON.stringify(orders));
+    displayOrders(orders);
+  }
+
+  function deleteOrder(index) {
+    if (confirm("آیا مطمئن هستید که می‌خواهید این سفارش را حذف کنید؟")) {
+      orders.splice(index, 1);
+      localStorage.setItem("orders", JSON.stringify(orders));
+      displayOrders(orders);
+    }
+  }
+
+  function clearOrders() {
+    if (confirm("آیا مطمئن هستید که می‌خواهید همه سفارش‌ها را حذف کنید؟")) {
+      orders = [];
+      localStorage.removeItem("orders");
+      displayOrders(orders);
+    }
+  }
+
+  function searchOrders() {
+    const searchTerm = document.getElementById("searchInput").value.trim().toLowerCase();
+    if (!searchTerm) {
+      displayOrders(orders);
+      return;
+    }
+    const filtered = orders.filter(o => o.name.toLowerCase().includes(searchTerm));
+    displayOrders(filtered);
+  }
+
+  // صدور فاکتور ساده در پنجره جدید (PDF)
+  function generateInvoice() {
+    if (orders.length === 0) {
+      alert("هیچ سفارشی برای صدور فاکتور وجود ندارد.");
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    doc.setFont("Tahoma", "normal");
+    doc.setFontSize(16);
+    doc.text("فاکتور سفارشات", 220, 40);
+
+    let y = 80;
+    orders.forEach((o, i) => {
+      doc.setFontSize(12);
+      doc.text(`${i + 1}. نام: ${o.name}`, 40, y);
+      doc.text(`شماره تماس: ${o.phone}`, 250, y);
+      doc.text(`آدرس: ${o.address}`, 40, y + 15);
+      doc.text(`سن: ${o.age}`, 250, y + 15);
+      doc.text(`لباس: ${o.dress}`, 40, y + 30);
+      doc.text(`تاریخ: ${o.date}`, 250, y + 30);
+      y += 60;
+      if (y > 750) {
+        doc.addPage();
+        y = 40;
+      }
+    });
+
+    doc.save("invoice.pdf");
+  }
+
+  function exportToPDF() {
+    if (orders.length === 0) {
+      alert("هیچ سفارشی برای خروجی PDF وجود ندارد.");
+      return;
+    }
+    generateInvoice();
+  }
+
+  // شروع نمایش سفارش‌ها هنگام بارگذاری صفحه
+  displayOrders(orders);
+</script>
+</body>
+</html>
